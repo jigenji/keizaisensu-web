@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>経済センサス データビューア</title>
+  <title>日本の産業統計 総合ダッシュボード</title>
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 </head>
 <body>
   <header class="header">
     <div class="header-inner">
-      <h1 class="header-title">経済センサス データビューア</h1>
-      <p class="header-subtitle">令和3年（2021年）経済センサス‐活動調査の全データを可視化</p>
+      <h1 class="header-title">日本の産業統計 総合ダッシュボード</h1>
+      <p class="header-subtitle">経済センサス・労働力調査・雇用動向調査・国勢調査・就業構造基本調査・賃金構造基本統計調査</p>
     </div>
   </header>
 
@@ -21,12 +21,17 @@
       <button class="nav-btn" data-tab="prefecture">都道府県別</button>
       <button class="nav-btn" data-tab="industry">産業別</button>
       <button class="nav-btn" data-tab="organization">経営組織別</button>
-      <button class="nav-btn" data-tab="timeseries">時系列比較</button>
+      <button class="nav-btn" data-tab="laborforce">労働力調査</button>
+      <button class="nav-btn" data-tab="employment">雇用動向</button>
+      <button class="nav-btn" data-tab="census">国勢調査</button>
+      <button class="nav-btn" data-tab="structure">就業構造</button>
+      <button class="nav-btn" data-tab="wage">賃金構造</button>
+      <button class="nav-btn" data-tab="forecast">予測</button>
     </div>
   </nav>
 
   <main class="main">
-    <!-- 概要タブ -->
+    <!-- ========== 概要 ========== -->
     <section id="tab-overview" class="tab-content active">
       <div class="summary-cards">
         <div class="card summary-card">
@@ -40,50 +45,72 @@
           <div class="summary-unit">人</div>
         </div>
         <div class="card summary-card">
-          <div class="summary-label">売上（収入）金額合計</div>
+          <div class="summary-label">売上金額合計</div>
           <div class="summary-value" id="total-sales">-</div>
           <div class="summary-unit">兆円</div>
         </div>
         <div class="card summary-card">
-          <div class="summary-label">付加価値額合計</div>
-          <div class="summary-value" id="total-added-value">-</div>
-          <div class="summary-unit">兆円</div>
+          <div class="summary-label">就業者数（2024年）</div>
+          <div class="summary-value" id="total-labor">-</div>
+          <div class="summary-unit">万人</div>
+        </div>
+        <div class="card summary-card">
+          <div class="summary-label">完全失業率（2024年）</div>
+          <div class="summary-value" id="total-unemployment">-</div>
+          <div class="summary-unit">%</div>
+        </div>
+        <div class="card summary-card">
+          <div class="summary-label">非正規雇用比率</div>
+          <div class="summary-value" id="total-nonregular">-</div>
+          <div class="summary-unit">%</div>
         </div>
       </div>
       <div class="card">
-        <h2 class="card-title">経済センサス‐活動調査とは</h2>
+        <h2 class="card-title">本サイトについて</h2>
         <p class="card-text">
-          経済センサス‐活動調査は、日本国内に所在する全ての事業所・企業の経済活動の実態を明らかにするために、
-          総務省・経済産業省が5年ごとに実施する基幹統計調査です。
-          事業所数、従業者数、売上（収入）金額等の産業横断的な事項を、産業分類別・地域別に把握できます。
+          本サイトは、日本の産業構造を多角的に把握するための総合ダッシュボードです。
+          以下の6つの主要統計調査のデータを統合し、産業ごとの就業者数・賃金・雇用動向・時系列推移・将来予測を可視化しています。
         </p>
-        <p class="card-text">
-          本サイトでは令和3年（2021年）6月1日に実施された最新の活動調査の結果を、
-          グラフやテーブルを用いて視覚的にわかりやすく表示しています。
-        </p>
-        <p class="card-text source-info">
-          出典：総務省・経済産業省「令和3年経済センサス‐活動調査」
-          <br>
-          <a href="https://www.e-stat.go.jp/stat-search/files?tstat=000001145590" target="_blank" rel="noopener">e-Stat 経済センサスデータ</a>
-        </p>
+        <div class="source-list">
+          <div class="source-item">
+            <strong>経済センサス‐活動調査</strong>（総務省・経済産業省）：事業所数・従業者数・売上金額
+            <a href="https://www.e-stat.go.jp/stat-search/files?tstat=000001145590" target="_blank" rel="noopener">e-Stat</a>
+          </div>
+          <div class="source-item">
+            <strong>労働力調査</strong>（総務省）：毎月の産業別就業者数・失業率・非正規雇用比率
+            <a href="https://www.stat.go.jp/data/roudou/" target="_blank" rel="noopener">統計局</a>
+          </div>
+          <div class="source-item">
+            <strong>雇用動向調査</strong>（厚生労働省）：産業別の入職率・離職率
+            <a href="https://www.mhlw.go.jp/toukei/list/9-23-1.html" target="_blank" rel="noopener">厚労省</a>
+          </div>
+          <div class="source-item">
+            <strong>国勢調査</strong>（総務省）：5年ごとの産業別・性別就業構造
+            <a href="https://www.stat.go.jp/data/kokusei/2020/" target="_blank" rel="noopener">統計局</a>
+          </div>
+          <div class="source-item">
+            <strong>就業構造基本調査</strong>（総務省）：転職・副業・非正規の実態
+            <a href="https://www.stat.go.jp/data/shugyou/" target="_blank" rel="noopener">統計局</a>
+          </div>
+          <div class="source-item">
+            <strong>賃金構造基本統計調査</strong>（厚生労働省）：産業別賃金・年齢・勤続年数
+            <a href="https://www.mhlw.go.jp/toukei/list/chinginkouzou.html" target="_blank" rel="noopener">厚労省</a>
+          </div>
+        </div>
       </div>
       <div class="grid-2col">
         <div class="card">
           <h2 class="card-title">産業大分類別 事業所数割合</h2>
-          <div class="chart-container">
-            <canvas id="overview-industry-pie"></canvas>
-          </div>
+          <div class="chart-container"><canvas id="overview-industry-pie"></canvas></div>
         </div>
         <div class="card">
           <h2 class="card-title">地方別 事業所数</h2>
-          <div class="chart-container">
-            <canvas id="overview-region-bar"></canvas>
-          </div>
+          <div class="chart-container"><canvas id="overview-region-bar"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- 都道府県別タブ -->
+    <!-- ========== 都道府県別 ========== -->
     <section id="tab-prefecture" class="tab-content">
       <div class="card">
         <h2 class="card-title">都道府県別 事業所数・従業者数</h2>
@@ -103,9 +130,7 @@
             </select>
           </label>
         </div>
-        <div class="chart-container chart-tall">
-          <canvas id="pref-chart"></canvas>
-        </div>
+        <div class="chart-container chart-tall"><canvas id="pref-chart"></canvas></div>
       </div>
       <div class="card">
         <h2 class="card-title">都道府県別データ一覧</h2>
@@ -120,7 +145,7 @@
                 <th data-sort="establishments">事業所数</th>
                 <th data-sort="employees">従業者数</th>
                 <th data-sort="sales">売上金額（百万円）</th>
-                <th data-sort="density">事業所密度<br>（/km²）</th>
+                <th data-sort="density">事業所密度（/km²）</th>
               </tr>
             </thead>
             <tbody id="pref-table-body"></tbody>
@@ -129,7 +154,7 @@
       </div>
     </section>
 
-    <!-- 産業別タブ -->
+    <!-- ========== 産業別 ========== -->
     <section id="tab-industry" class="tab-content">
       <div class="card">
         <h2 class="card-title">産業大分類別 事業所数・従業者数・売上金額</h2>
@@ -142,22 +167,16 @@
             </select>
           </label>
         </div>
-        <div class="chart-container chart-tall">
-          <canvas id="ind-chart"></canvas>
-        </div>
+        <div class="chart-container chart-tall"><canvas id="ind-chart"></canvas></div>
       </div>
       <div class="grid-2col">
         <div class="card">
           <h2 class="card-title">従業者数構成比</h2>
-          <div class="chart-container">
-            <canvas id="ind-emp-pie"></canvas>
-          </div>
+          <div class="chart-container"><canvas id="ind-emp-pie"></canvas></div>
         </div>
         <div class="card">
           <h2 class="card-title">売上金額構成比</h2>
-          <div class="chart-container">
-            <canvas id="ind-sales-pie"></canvas>
-          </div>
+          <div class="chart-container"><canvas id="ind-sales-pie"></canvas></div>
         </div>
       </div>
       <div class="card">
@@ -170,8 +189,8 @@
                 <th data-sort="establishments">事業所数</th>
                 <th data-sort="employees">従業者数</th>
                 <th data-sort="sales">売上金額（百万円）</th>
-                <th data-sort="perEst">1事業所当たり<br>従業者数</th>
-                <th data-sort="perEmp">従業者1人当たり<br>売上（万円）</th>
+                <th data-sort="perEst">1事業所当たり従業者数</th>
+                <th data-sort="perEmp">従業者1人当たり売上（万円）</th>
               </tr>
             </thead>
             <tbody id="ind-table-body"></tbody>
@@ -180,20 +199,16 @@
       </div>
     </section>
 
-    <!-- 経営組織別タブ -->
+    <!-- ========== 経営組織別 ========== -->
     <section id="tab-organization" class="tab-content">
       <div class="grid-2col">
         <div class="card">
           <h2 class="card-title">経営組織別 事業所数</h2>
-          <div class="chart-container">
-            <canvas id="org-est-chart"></canvas>
-          </div>
+          <div class="chart-container"><canvas id="org-est-chart"></canvas></div>
         </div>
         <div class="card">
           <h2 class="card-title">経営組織別 従業者数</h2>
-          <div class="chart-container">
-            <canvas id="org-emp-chart"></canvas>
-          </div>
+          <div class="chart-container"><canvas id="org-emp-chart"></canvas></div>
         </div>
       </div>
       <div class="card">
@@ -201,12 +216,7 @@
         <div class="table-wrapper">
           <table class="data-table" id="org-table">
             <thead>
-              <tr>
-                <th>経営組織</th>
-                <th>事業所数</th>
-                <th>従業者数</th>
-                <th>売上金額（百万円）</th>
-              </tr>
+              <tr><th>経営組織</th><th>事業所数</th><th>従業者数</th><th>売上金額（百万円）</th></tr>
             </thead>
             <tbody id="org-table-body"></tbody>
           </table>
@@ -214,47 +224,284 @@
       </div>
     </section>
 
-    <!-- 時系列比較タブ -->
-    <section id="tab-timeseries" class="tab-content">
+    <!-- ========== 労働力調査 ========== -->
+    <section id="tab-laborforce" class="tab-content">
+      <h2 class="section-title">労働力調査（総務省）</h2>
+      <p class="section-desc">毎月の産業別就業者数・完全失業率・非正規雇用比率の推移（年平均値）</p>
+
       <div class="card">
-        <h2 class="card-title">経済センサス 時系列比較（事業所数・従業者数）</h2>
-        <div class="chart-container">
-          <canvas id="ts-chart"></canvas>
+        <h2 class="card-title">産業別就業者数の推移（万人）</h2>
+        <div class="controls">
+          <label>産業選択：
+            <select id="lf-industry" multiple size="5">
+            </select>
+          </label>
+          <span class="hint">Ctrlキーで複数選択可</span>
+        </div>
+        <div class="chart-container chart-tall"><canvas id="lf-industry-chart"></canvas></div>
+      </div>
+
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">完全失業率の推移</h2>
+          <div class="chart-container"><canvas id="lf-unemployment-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">非正規雇用比率の推移</h2>
+          <div class="chart-container"><canvas id="lf-nonregular-chart"></canvas></div>
         </div>
       </div>
+
       <div class="card">
-        <h2 class="card-title">調査年次別データ</h2>
+        <h2 class="card-title">就業者数合計の推移</h2>
+        <div class="chart-container"><canvas id="lf-total-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別就業者数データ一覧（万人）</h2>
         <div class="table-wrapper">
-          <table class="data-table" id="ts-table">
-            <thead>
-              <tr>
-                <th>調査年</th>
-                <th>全事業所数</th>
-                <th>全従業者数</th>
-                <th>売上金額合計（百万円）</th>
-                <th>事業所数増減率</th>
-                <th>従業者数増減率</th>
-              </tr>
-            </thead>
-            <tbody id="ts-table-body"></tbody>
+          <table class="data-table" id="lf-table">
+            <thead id="lf-table-head"></thead>
+            <tbody id="lf-table-body"></tbody>
           </table>
         </div>
       </div>
-      <div class="card">
-        <h2 class="card-title">産業別 時系列変化（事業所数）</h2>
-        <div class="chart-container chart-tall">
-          <canvas id="ts-industry-chart"></canvas>
+    </section>
+
+    <!-- ========== 雇用動向調査 ========== -->
+    <section id="tab-employment" class="tab-content">
+      <h2 class="section-title">雇用動向調査（厚生労働省）</h2>
+      <p class="section-desc">産業別の入職率・離職率（労働者の流出入）の推移</p>
+
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">全体 入職率・離職率の推移</h2>
+          <div class="chart-container"><canvas id="et-overall-chart"></canvas></div>
         </div>
+        <div class="card">
+          <h2 class="card-title">産業別 入職率（2023年）</h2>
+          <div class="chart-container"><canvas id="et-hiring-chart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 入職率・離職率の時系列</h2>
+        <div class="controls">
+          <label>産業：
+            <select id="et-industry-select"></select>
+          </label>
+        </div>
+        <div class="chart-container"><canvas id="et-industry-ts-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 入職率・離職率データ一覧（2023年）</h2>
+        <div class="table-wrapper">
+          <table class="data-table" id="et-table">
+            <thead>
+              <tr>
+                <th>産業</th><th>入職率（%）</th><th>離職率（%）</th><th>差（入職-離職）</th>
+              </tr>
+            </thead>
+            <tbody id="et-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 国勢調査 ========== -->
+    <section id="tab-census" class="tab-content">
+      <h2 class="section-title">国勢調査（総務省）</h2>
+      <p class="section-desc">5年ごとの産業別就業構造、男女別の推移（千人）</p>
+
+      <div class="card">
+        <h2 class="card-title">産業別就業者数の推移（千人）</h2>
+        <div class="controls">
+          <label>産業選択：
+            <select id="nc-industry" multiple size="5"></select>
+          </label>
+          <span class="hint">Ctrlキーで複数選択可</span>
+        </div>
+        <div class="chart-container chart-tall"><canvas id="nc-industry-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">男女別就業者数の推移</h2>
+        <div class="chart-container"><canvas id="nc-gender-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">国勢調査 産業別就業者数一覧（千人）</h2>
+        <div class="table-wrapper">
+          <table class="data-table" id="nc-table">
+            <thead id="nc-table-head"></thead>
+            <tbody id="nc-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 就業構造基本調査 ========== -->
+    <section id="tab-structure" class="tab-content">
+      <h2 class="section-title">就業構造基本調査（総務省）</h2>
+      <p class="section-desc">転職・副業・非正規雇用の産業別実態</p>
+
+      <div class="card">
+        <h2 class="card-title">産業別有業者数の推移（万人）</h2>
+        <div class="chart-container chart-tall"><canvas id="es-workers-chart"></canvas></div>
+      </div>
+
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">産業別 転職者割合（%）</h2>
+          <div class="chart-container chart-tall"><canvas id="es-jobchange-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">産業別 副業者比率（%）</h2>
+          <div class="chart-container chart-tall"><canvas id="es-sidejob-chart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 非正規雇用比率（%）</h2>
+        <div class="chart-container chart-tall"><canvas id="es-nonregular-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">就業構造基本調査 データ一覧</h2>
+        <div class="controls">
+          <label>データ種別：
+            <select id="es-data-type">
+              <option value="workers">有業者数（万人）</option>
+              <option value="jobchange">転職者割合（%）</option>
+              <option value="sidejob">副業者比率（%）</option>
+              <option value="nonregular">非正規雇用比率（%）</option>
+            </select>
+          </label>
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="es-table">
+            <thead id="es-table-head"></thead>
+            <tbody id="es-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 賃金構造 ========== -->
+    <section id="tab-wage" class="tab-content">
+      <h2 class="section-title">賃金構造基本統計調査（厚生労働省）</h2>
+      <p class="section-desc">産業別の賃金・賞与・年齢構成・男女格差</p>
+
+      <div class="card">
+        <h2 class="card-title">産業別 所定内給与額の推移（千円/月）</h2>
+        <div class="controls">
+          <label>産業選択：
+            <select id="wage-industry" multiple size="5"></select>
+          </label>
+          <span class="hint">Ctrlキーで複数選択可</span>
+        </div>
+        <div class="chart-container chart-tall"><canvas id="wage-monthly-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 年間賞与の推移（千円）</h2>
+        <div class="chart-container chart-tall"><canvas id="wage-bonus-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 推定年収ランキング（2023年）</h2>
+        <div class="chart-container chart-tall"><canvas id="wage-annual-chart"></canvas></div>
+      </div>
+
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">産業別 男女別賃金（2023年、千円/月）</h2>
+          <div class="chart-container chart-tall"><canvas id="wage-gender-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">産業別 平均年齢・勤続年数（2023年）</h2>
+          <div class="chart-container chart-tall"><canvas id="wage-demo-chart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">賃金データ一覧</h2>
+        <div class="table-wrapper">
+          <table class="data-table" id="wage-table">
+            <thead>
+              <tr>
+                <th>産業</th>
+                <th>月額給与（千円）</th>
+                <th>年間賞与（千円）</th>
+                <th>推定年収（万円）</th>
+                <th>平均年齢</th>
+                <th>平均勤続年数</th>
+                <th>男性給与</th>
+                <th>女性給与</th>
+                <th>男女比</th>
+              </tr>
+            </thead>
+            <tbody id="wage-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 予測 ========== -->
+    <section id="tab-forecast" class="tab-content">
+      <h2 class="section-title">将来予測</h2>
+      <p class="section-desc">過去のトレンドに基づく線形回帰予測（2025年〜2030年）</p>
+
+      <div class="card">
+        <h2 class="card-title">産業別就業者数の予測（万人）</h2>
+        <div class="controls">
+          <label>産業選択：
+            <select id="fc-industry" multiple size="5"></select>
+          </label>
+          <span class="hint">Ctrlキーで複数選択可</span>
+        </div>
+        <div class="chart-container chart-tall"><canvas id="fc-employment-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別賃金の予測（千円/月）</h2>
+        <div class="chart-container chart-tall"><canvas id="fc-wage-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">主要指標の予測</h2>
+        <div class="grid-2col">
+          <div class="chart-container"><canvas id="fc-unemployment-chart"></canvas></div>
+          <div class="chart-container"><canvas id="fc-nonregular-chart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">予測データ一覧</h2>
+        <div class="table-wrapper">
+          <table class="data-table" id="fc-table">
+            <thead id="fc-table-head"></thead>
+            <tbody id="fc-table-body"></tbody>
+          </table>
+        </div>
+        <p class="card-text source-info">
+          注：予測値は過去のトレンドに基づく線形回帰による参考値です。
+          経済情勢の変化や政策変更等により実際の値は大きく異なる可能性があります。
+        </p>
       </div>
     </section>
   </main>
 
   <footer class="footer">
-    <p>出典：総務省・経済産業省「経済センサス‐活動調査」</p>
+    <p>出典：総務省・経済産業省・厚生労働省 各種統計調査</p>
     <p>
-      <a href="https://www.stat.go.jp/data/e-census/2021/index.html" target="_blank" rel="noopener">統計局</a> ｜
-      <a href="https://www.e-stat.go.jp/stat-search/files?tstat=000001145590" target="_blank" rel="noopener">e-Stat</a> ｜
-      <a href="https://www.meti.go.jp/statistics/tyo/census/index.html" target="_blank" rel="noopener">経済産業省</a>
+      <a href="https://www.e-stat.go.jp/" target="_blank" rel="noopener">e-Stat</a> ｜
+      <a href="https://www.stat.go.jp/data/roudou/" target="_blank" rel="noopener">労働力調査</a> ｜
+      <a href="https://www.mhlw.go.jp/toukei/list/9-23-1.html" target="_blank" rel="noopener">雇用動向調査</a> ｜
+      <a href="https://www.stat.go.jp/data/kokusei/2020/" target="_blank" rel="noopener">国勢調査</a> ｜
+      <a href="https://www.stat.go.jp/data/shugyou/" target="_blank" rel="noopener">就業構造基本調査</a> ｜
+      <a href="https://www.mhlw.go.jp/toukei/list/chinginkouzou.html" target="_blank" rel="noopener">賃金構造基本統計調査</a>
     </p>
   </footer>
 

@@ -334,6 +334,60 @@ a:hover {
   color: var(--danger);
 }
 
+/* === Section Title === */
+.section-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  color: var(--primary-dark);
+}
+
+.section-desc {
+  color: var(--text-light);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* === Source List === */
+.source-list {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.source-item {
+  font-size: 0.9rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg);
+  border-radius: var(--radius);
+  border-left: 3px solid var(--primary);
+}
+
+.source-item a {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+}
+
+/* === Hint text === */
+.hint {
+  font-size: 0.8rem;
+  color: var(--text-light);
+}
+
+/* === Multiple select === */
+.controls select[multiple] {
+  min-width: 280px;
+  padding: 0.3rem;
+}
+
+/* === Forecast dashed lines === */
+.forecast-note {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
 /* === Footer === */
 .footer {
   text-align: center;
