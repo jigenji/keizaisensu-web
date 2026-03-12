@@ -379,6 +379,61 @@
     renderIndTS();
     sel.addEventListener("change", renderIndTS);
 
+    // Age-specific hiring/separation charts
+    var aa = CENSUS_DATA.ageAnalysis;
+    if (aa && aa.hiringByAge) {
+      var ageLabels = aa.hiringAgeGroups;
+      makeChart("et-age-hiring-chart", {
+        type: "bar",
+        data: {
+          labels: ageLabels,
+          datasets: [
+            { label: "男性", data: aa.hiringByAge.male.hiringRate, backgroundColor: COLORS[0], borderRadius: 2 },
+            { label: "女性", data: aa.hiringByAge.female.hiringRate, backgroundColor: COLORS[5], borderRadius: 2 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: "入職率（%）" } }, scales: { y: { title: { display: true, text: "%" } } } }
+      });
+      makeChart("et-age-separation-chart", {
+        type: "bar",
+        data: {
+          labels: ageLabels,
+          datasets: [
+            { label: "男性", data: aa.hiringByAge.male.separationRate, backgroundColor: COLORS[0], borderRadius: 2 },
+            { label: "女性", data: aa.hiringByAge.female.separationRate, backgroundColor: COLORS[5], borderRadius: 2 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: "離職率（%）" } }, scales: { y: { title: { display: true, text: "%" } } } }
+      });
+
+      // Per-industry age hiring
+      var ageIndSel = document.getElementById("et-age-industry-select");
+      aa.hiringByAgeIndustry.forEach(function (i) {
+        var opt = document.createElement("option");
+        opt.value = i.name; opt.textContent = i.name;
+        ageIndSel.appendChild(opt);
+      });
+      ageIndSel.value = aa.hiringByAgeIndustry[0].name;
+
+      function renderAgeIndChart() {
+        var ind = aa.hiringByAgeIndustry.find(function (i) { return i.name === ageIndSel.value; });
+        if (!ind) return;
+        makeChart("et-age-industry-chart", {
+          type: "bar",
+          data: {
+            labels: ageLabels,
+            datasets: [
+              { label: shortName(ind.name) + " 入職率", data: ind.values, backgroundColor: COLORS[0], borderRadius: 3 },
+              { label: "全産業計 入職率", data: aa.hiringByAge.total.hiringRate, backgroundColor: COLORS[2], borderRadius: 3 }
+            ]
+          },
+          options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: "%" } } } }
+        });
+      }
+      renderAgeIndChart();
+      ageIndSel.addEventListener("change", renderAgeIndChart);
+    }
+
     // Table
     document.getElementById("et-table-body").innerHTML = et.byIndustry.slice().sort(function (a, b) { return b.hiringRate[lastIdx] - a.hiringRate[lastIdx]; }).map(function (i) {
       var diff = (i.hiringRate[lastIdx] - i.separationRate[lastIdx]).toFixed(1);
@@ -612,7 +667,160 @@
   }
 
   // ========================================
-  // 10. 予測タブ
+  // 10. 年齢別分析タブ
+  // ========================================
+  function initAgeAnalysis() {
+    var aa = CENSUS_DATA.ageAnalysis;
+    var ageGroups = aa.ageGroups;
+
+    // --- Industry × Age stacked bar ---
+    var indSel = document.getElementById("age-industry");
+    aa.industryByAge.forEach(function (i, idx) {
+      var opt = document.createElement("option");
+      opt.value = idx; opt.textContent = i.name;
+      if (idx < 6) opt.selected = true;
+      indSel.appendChild(opt);
+    });
+
+    function renderIndustryAge() {
+      var selected = Array.from(indSel.selectedOptions).map(function (o) { return parseInt(o.value); });
+      if (selected.length === 0) selected = [0, 1, 2, 3, 4, 5];
+      var datasets = ageGroups.map(function (ag, agIdx) {
+        return {
+          label: ag,
+          data: selected.map(function (idx) { return aa.industryByAge[idx].values[agIdx]; }),
+          backgroundColor: COLORS[agIdx],
+          borderRadius: 2
+        };
+      });
+      makeChart("age-industry-chart", {
+        type: "bar",
+        data: { labels: selected.map(function (idx) { return shortName(aa.industryByAge[idx].name); }), datasets: datasets },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: "万人" } } } }
+      });
+    }
+    renderIndustryAge();
+    indSel.addEventListener("change", renderIndustryAge);
+
+    // --- Age distribution pie/doughnut ---
+    var distSel = document.getElementById("age-dist-industry");
+    aa.ageDistribution.forEach(function (i) {
+      var opt = document.createElement("option");
+      opt.value = i.name; opt.textContent = i.name;
+      distSel.appendChild(opt);
+    });
+    distSel.value = aa.ageDistribution[0].name;
+
+    function renderAgeDist() {
+      var ind = aa.ageDistribution.find(function (i) { return i.name === distSel.value; });
+      if (!ind) return;
+      makeChart("age-dist-chart", {
+        type: "doughnut",
+        data: { labels: ageGroups, datasets: [{ data: ind.values, backgroundColor: COLORS.slice(0, ageGroups.length) }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { title: { display: true, text: shortName(ind.name) + " 年齢構成" }, tooltip: { callbacks: { label: function (c) { return c.label + ": " + c.parsed + "%"; } } } }
+        }
+      });
+
+      // Comparison chart: all industries side by side for selected age group
+      var sorted = aa.ageDistribution.slice().sort(function (a, b) {
+        // Sort by young worker ratio (15-24 + 25-34)
+        return (b.values[0] + b.values[1]) - (a.values[0] + a.values[1]);
+      });
+      makeChart("age-dist-compare-chart", {
+        type: "bar",
+        data: {
+          labels: sorted.map(function (i) { return shortName(i.name); }),
+          datasets: ageGroups.map(function (ag, agIdx) {
+            return { label: ag, data: sorted.map(function (i) { return i.values[agIdx]; }), backgroundColor: COLORS[agIdx], borderRadius: 1 };
+          })
+        },
+        options: {
+          indexAxis: "y", responsive: true, maintainAspectRatio: false,
+          plugins: { title: { display: true, text: "産業別 年齢構成比較" }, legend: { position: "top", labels: { font: { size: 10 } } } },
+          scales: { x: { stacked: true, max: 100, title: { display: true, text: "%" } }, y: { stacked: true, ticks: { font: { size: 10 } } } }
+        }
+      });
+    }
+    renderAgeDist();
+    distSel.addEventListener("change", renderAgeDist);
+
+    // --- Age group timeseries ---
+    var ageGroupNames = Object.keys(aa.totalByAgeTimeseries);
+    makeChart("age-timeseries-chart", {
+      type: "line",
+      data: {
+        labels: aa.ageGroupYears,
+        datasets: ageGroupNames.map(function (name, idx) {
+          return { label: name, data: aa.totalByAgeTimeseries[name], borderColor: COLORS[idx], backgroundColor: "transparent", tension: 0.3, pointRadius: 4 };
+        })
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, scales: { y: { title: { display: true, text: "万人" } } } }
+    });
+
+    // --- Wage curve by age (total, male, female) ---
+    makeChart("age-wage-curve-chart", {
+      type: "line",
+      data: {
+        labels: aa.wageAgeGroups,
+        datasets: [
+          { label: "全体", data: aa.wageByAge.total, borderColor: COLORS[2], backgroundColor: "transparent", tension: 0.3, pointRadius: 4, borderWidth: 3 },
+          { label: "男性", data: aa.wageByAge.male, borderColor: COLORS[0], backgroundColor: "transparent", tension: 0.3, pointRadius: 4 },
+          { label: "女性", data: aa.wageByAge.female, borderColor: COLORS[5], backgroundColor: "transparent", tension: 0.3, pointRadius: 4 }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: "千円/月" } } } }
+    });
+
+    // --- Industry wage curves ---
+    var wageSel = document.getElementById("age-wage-industry");
+    aa.wageByAgeIndustry.forEach(function (i, idx) {
+      var opt = document.createElement("option");
+      opt.value = idx; opt.textContent = i.name;
+      if (idx < 5) opt.selected = true;
+      wageSel.appendChild(opt);
+    });
+
+    function renderWageCurves() {
+      var selected = Array.from(wageSel.selectedOptions).map(function (o) { return parseInt(o.value); });
+      if (selected.length === 0) selected = [0, 1, 2, 3, 4];
+      var datasets = selected.map(function (idx, ci) {
+        var i = aa.wageByAgeIndustry[idx];
+        return { label: shortName(i.name), data: i.values, borderColor: COLORS[ci % COLORS.length], backgroundColor: "transparent", tension: 0.3, pointRadius: 3 };
+      });
+      makeChart("age-wage-industry-chart", {
+        type: "line",
+        data: { labels: aa.wageAgeGroups, datasets: datasets },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, scales: { y: { title: { display: true, text: "千円/月" } } } }
+      });
+    }
+    renderWageCurves();
+    wageSel.addEventListener("change", renderWageCurves);
+
+    // --- Tables ---
+    // Employment by age table
+    document.getElementById("age-table-head").innerHTML = "<tr><th>産業</th>" + ageGroups.map(function (g) { return "<th>" + g + "</th>"; }).join("") + "<th>合計</th></tr>";
+    document.getElementById("age-table-body").innerHTML = aa.industryByAge.map(function (i) {
+      var total = i.values.reduce(function (s, v) { return s + v; }, 0);
+      return "<tr><td>" + i.name + "</td>" + i.values.map(function (v) { return "<td>" + v + "</td>"; }).join("") + "<td><strong>" + total + "</strong></td></tr>";
+    }).join("");
+
+    // Wage by age table
+    document.getElementById("age-wage-table-head").innerHTML = "<tr><th>産業</th>" + aa.wageAgeGroups.map(function (g) { return "<th>" + g + "</th>"; }).join("") + "</tr>";
+    var wageRows = [
+      "<tr style='font-weight:700'><td>全体（計）</td>" + aa.wageByAge.total.map(function (v) { return "<td>" + v + "</td>"; }).join("") + "</tr>",
+      "<tr style='font-weight:700'><td>男性（計）</td>" + aa.wageByAge.male.map(function (v) { return "<td>" + v + "</td>"; }).join("") + "</tr>",
+      "<tr style='font-weight:700'><td>女性（計）</td>" + aa.wageByAge.female.map(function (v) { return "<td>" + v + "</td>"; }).join("") + "</tr>"
+    ];
+    wageRows = wageRows.concat(aa.wageByAgeIndustry.map(function (i) {
+      return "<tr><td>" + i.name + "</td>" + i.values.map(function (v) { return "<td>" + v + "</td>"; }).join("") + "</tr>";
+    }));
+    document.getElementById("age-wage-table-body").innerHTML = wageRows.join("");
+  }
+
+  // ========================================
+  // 11. 予測タブ
   // ========================================
   function initForecast() {
     var lf = CENSUS_DATA.laborForce;
@@ -733,5 +941,6 @@
   initNationalCensus();
   initEmploymentStructure();
   initWageStructure();
+  initAgeAnalysis();
   initForecast();
 })();

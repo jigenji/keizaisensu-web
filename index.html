@@ -26,6 +26,7 @@
       <button class="nav-btn" data-tab="census">国勢調査</button>
       <button class="nav-btn" data-tab="structure">就業構造</button>
       <button class="nav-btn" data-tab="wage">賃金構造</button>
+      <button class="nav-btn" data-tab="age">年齢別</button>
       <button class="nav-btn" data-tab="forecast">予測</button>
     </div>
   </nav>
@@ -295,7 +296,25 @@
       </div>
 
       <div class="card">
-        <h2 class="card-title">産業別 入職率・離職率データ一覧（2023年）</h2>
+        <h2 class="card-title">年齢階級別 入職率・離職率（2024年）</h2>
+        <div class="grid-2col">
+          <div class="chart-container"><canvas id="et-age-hiring-chart"></canvas></div>
+          <div class="chart-container"><canvas id="et-age-separation-chart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">主要産業の年齢別入職率（2024年）</h2>
+        <div class="controls">
+          <label>産業：
+            <select id="et-age-industry-select"></select>
+          </label>
+        </div>
+        <div class="chart-container"><canvas id="et-age-industry-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 入職率・離職率データ一覧（2024年）</h2>
         <div class="table-wrapper">
           <table class="data-table" id="et-table">
             <thead>
@@ -454,6 +473,77 @@
               </tr>
             </thead>
             <tbody id="wage-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== 年齢別分析 ========== -->
+    <section id="tab-age" class="tab-content">
+      <h2 class="section-title">年齢別分析</h2>
+      <p class="section-desc">産業別の年齢構成・年齢別の人口流入（入職）・年齢階級別賃金カーブ</p>
+
+      <div class="card">
+        <h2 class="card-title">産業別 年齢階級別就業者数（2024年、万人）</h2>
+        <div class="controls">
+          <label>産業選択：
+            <select id="age-industry" multiple size="5"></select>
+          </label>
+          <span class="hint">Ctrlキーで複数選択可</span>
+        </div>
+        <div class="chart-container chart-tall"><canvas id="age-industry-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 年齢構成比率（2024年）</h2>
+        <div class="controls">
+          <label>産業：
+            <select id="age-dist-industry"></select>
+          </label>
+        </div>
+        <div class="grid-2col">
+          <div class="chart-container"><canvas id="age-dist-chart"></canvas></div>
+          <div class="chart-container"><canvas id="age-dist-compare-chart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">全産業 年齢階級別就業者数の推移（万人）</h2>
+        <div class="chart-container chart-tall"><canvas id="age-timeseries-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">年齢階級別 賃金カーブ（2024年、千円/月）</h2>
+        <div class="chart-container"><canvas id="age-wage-curve-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 年齢階級別賃金カーブ（2024年、千円/月）</h2>
+        <div class="controls">
+          <label>産業選択：
+            <select id="age-wage-industry" multiple size="5"></select>
+          </label>
+          <span class="hint">Ctrlキーで複数選択可</span>
+        </div>
+        <div class="chart-container chart-tall"><canvas id="age-wage-industry-chart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 年齢階級別就業者数一覧（万人）</h2>
+        <div class="table-wrapper">
+          <table class="data-table" id="age-table">
+            <thead id="age-table-head"></thead>
+            <tbody id="age-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 年齢階級別賃金一覧（千円/月）</h2>
+        <div class="table-wrapper">
+          <table class="data-table" id="age-wage-table">
+            <thead id="age-wage-table-head"></thead>
+            <tbody id="age-wage-table-body"></tbody>
           </table>
         </div>
       </div>
