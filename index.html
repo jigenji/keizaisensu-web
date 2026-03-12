@@ -51,6 +51,11 @@
           <div class="summary-unit">兆円</div>
         </div>
         <div class="card summary-card">
+          <div class="summary-label">付加価値額</div>
+          <div class="summary-value" id="total-added-value">-</div>
+          <div class="summary-unit">兆円</div>
+        </div>
+        <div class="card summary-card">
           <div class="summary-label">就業者数（2024年）</div>
           <div class="summary-value" id="total-labor">-</div>
           <div class="summary-unit">万人</div>
@@ -107,6 +112,13 @@
         <div class="card">
           <h2 class="card-title">地方別 事業所数</h2>
           <div class="chart-container"><canvas id="overview-region-bar"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">経済センサス 時系列比較（2012年・2016年・2021年）</h2>
+        <div class="grid-2col">
+          <div class="chart-container"><canvas id="overview-census-time-chart"></canvas></div>
+          <div class="chart-container"><canvas id="overview-census-industry-chart"></canvas></div>
         </div>
       </div>
     </section>
@@ -259,6 +271,11 @@
       </div>
 
       <div class="card">
+        <h2 class="card-title">産業別 正規・非正規雇用者数（2024年、万人）</h2>
+        <div class="chart-container chart-tall"><canvas id="lf-emptype-chart"></canvas></div>
+      </div>
+
+      <div class="card">
         <h2 class="card-title">産業別就業者数データ一覧（万人）</h2>
         <div class="table-wrapper">
           <table class="data-table" id="lf-table">
@@ -311,6 +328,22 @@
           </label>
         </div>
         <div class="chart-container"><canvas id="et-age-industry-chart"></canvas></div>
+      </div>
+
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">離職理由の構成（2024年）</h2>
+          <div class="chart-container"><canvas id="et-reason-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">産業別 離職理由比較</h2>
+          <div class="controls">
+            <label>産業：
+              <select id="et-reason-industry-select"></select>
+            </label>
+          </div>
+          <div class="chart-container"><canvas id="et-reason-industry-chart"></canvas></div>
+        </div>
       </div>
 
       <div class="card">
@@ -455,6 +488,28 @@
         </div>
       </div>
 
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">企業規模別 賃金格差（2024年、千円/月）</h2>
+          <div class="chart-container chart-tall"><canvas id="wage-size-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">産業別 時間当たり賃金（2024年、円）</h2>
+          <div class="chart-container chart-tall"><canvas id="wage-hourly-chart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">正規・非正規 賃金格差（2024年、千円/月）</h2>
+          <div class="chart-container chart-tall"><canvas id="wage-emptype-chart"></canvas></div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">産業別 月間労働時間と残業時間（2024年）</h2>
+          <div class="chart-container chart-tall"><canvas id="wage-hours-chart"></canvas></div>
+        </div>
+      </div>
+
       <div class="card">
         <h2 class="card-title">賃金データ一覧</h2>
         <div class="table-wrapper">
@@ -481,7 +536,41 @@
     <!-- ========== 年齢別分析 ========== -->
     <section id="tab-age" class="tab-content">
       <h2 class="section-title">年齢別分析</h2>
-      <p class="section-desc">産業別の年齢構成・年齢別の人口流入（入職）・年齢階級別賃金カーブ</p>
+      <p class="section-desc">産業別の年齢構成・労働人口ピラミッド・年齢別の人口流入（入職）・年齢階級別賃金カーブ</p>
+
+      <div class="card">
+        <h2 class="card-title">産業別 労働人口ピラミッド（2024年、万人）</h2>
+        <div class="controls">
+          <label>産業：
+            <select id="pyramid-industry"></select>
+          </label>
+        </div>
+        <div class="chart-container chart-tall"><canvas id="pyramid-chart"></canvas></div>
+        <p class="hint">左側が男性、右側が女性の就業者数</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">産業別 労働人口ピラミッド比較</h2>
+        <div class="grid-2col">
+          <div>
+            <div class="controls">
+              <label>産業A：<select id="pyramid-compare-a"></select></label>
+            </div>
+            <div class="chart-container"><canvas id="pyramid-compare-chart-a"></canvas></div>
+          </div>
+          <div>
+            <div class="controls">
+              <label>産業B：<select id="pyramid-compare-b"></select></label>
+            </div>
+            <div class="chart-container"><canvas id="pyramid-compare-chart-b"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">地域ブロック別 産業構成比（%）</h2>
+        <div class="chart-container chart-tall"><canvas id="regional-industry-chart"></canvas></div>
+      </div>
 
       <div class="card">
         <h2 class="card-title">産業別 年齢階級別就業者数（2024年、万人）</h2>

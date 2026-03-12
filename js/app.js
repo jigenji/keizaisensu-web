@@ -115,6 +115,7 @@
     document.getElementById("total-establishments").textContent = fmt(s.totalEstablishments);
     document.getElementById("total-employees").textContent = fmt(s.totalEmployees);
     document.getElementById("total-sales").textContent = fmtTrillion(s.totalSales);
+    document.getElementById("total-added-value").textContent = fmtTrillion(s.totalAddedValue);
     document.getElementById("total-labor").textContent = fmt(lf.totalEmployed[lastIdx]);
     document.getElementById("total-unemployment").textContent = lf.unemploymentRate[lastIdx];
     document.getElementById("total-nonregular").textContent = lf.nonRegularRate[lastIdx];
@@ -155,6 +156,40 @@
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return fmt(c.parsed.y) + " 事業所"; } } } },
         scales: { y: { beginAtZero: true, ticks: { callback: function (v) { return (v / 10000).toFixed(0) + "万"; } } } }
+      }
+    });
+
+    // Census timeseries
+    var ct = CENSUS_DATA.censusTimes;
+    makeChart("overview-census-time-chart", {
+      type: "bar",
+      data: {
+        labels: ct.map(function (c) { return c.year.replace(/（.*）/, ""); }),
+        datasets: [
+          { label: "事業所数", data: ct.map(function (c) { return c.establishments; }), backgroundColor: COLORS[0], borderRadius: 3, yAxisID: "y" },
+          { label: "従業者数", data: ct.map(function (c) { return c.employees; }), backgroundColor: COLORS[1], borderRadius: 3, yAxisID: "y" }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { title: { display: true, text: "事業所数・従業者数の推移" } },
+        scales: { y: { beginAtZero: true, ticks: { callback: function (v) { return (v / 10000).toFixed(0) + "万"; } } } }
+      }
+    });
+
+    var cti = CENSUS_DATA.censusTimeseriesIndustry;
+    makeChart("overview-census-industry-chart", {
+      type: "line",
+      data: {
+        labels: cti.labels,
+        datasets: cti.series.map(function (s, idx) {
+          return { label: shortName(s.name), data: s.values, borderColor: COLORS[idx], backgroundColor: "transparent", tension: 0.3, pointRadius: 4 };
+        })
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { title: { display: true, text: "産業別事業所数の推移" }, legend: { position: "top", labels: { font: { size: 10 } } } },
+        scales: { y: { ticks: { callback: function (v) { return (v / 10000).toFixed(0) + "万"; } } } }
       }
     });
   }
@@ -306,6 +341,23 @@
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } }
     });
 
+    // Regular/Non-regular by industry
+    var ad = CENSUS_DATA.additionalData;
+    if (ad && ad.employmentTypeByIndustry) {
+      var etd = ad.employmentTypeByIndustry.slice().sort(function (a, b) { return (b.regular + b.nonRegular) - (a.regular + a.nonRegular); });
+      makeChart("lf-emptype-chart", {
+        type: "bar",
+        data: {
+          labels: etd.map(function (d) { return shortName(d.name); }),
+          datasets: [
+            { label: "正規雇用", data: etd.map(function (d) { return d.regular; }), backgroundColor: COLORS[0], borderRadius: 2 },
+            { label: "非正規雇用", data: etd.map(function (d) { return d.nonRegular; }), backgroundColor: COLORS[3], borderRadius: 2 }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: "万人" } } } }
+      });
+    }
+
     // Table
     var thead = "<tr><th>産業</th>" + lf.years.map(function (y) { return "<th>" + y + "</th>"; }).join("") + "</tr>";
     document.getElementById("lf-table-head").innerHTML = thead;
@@ -432,6 +484,43 @@
       }
       renderAgeIndChart();
       ageIndSel.addEventListener("change", renderAgeIndChart);
+    }
+
+    // Separation reasons
+    var ad = CENSUS_DATA.additionalData;
+    if (ad && ad.separationReasons) {
+      var sr = ad.separationReasons;
+      makeChart("et-reason-chart", {
+        type: "doughnut",
+        data: { labels: sr.labels, datasets: [{ data: sr.total, backgroundColor: COLORS.slice(0, sr.labels.length) }] },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { title: { display: true, text: "全産業計" }, tooltip: { callbacks: { label: function (c) { return c.label + ": " + c.parsed + "%"; } } } }
+        }
+      });
+
+      var reasonSel = document.getElementById("et-reason-industry-select");
+      sr.byIndustry.forEach(function (i) {
+        var opt = document.createElement("option");
+        opt.value = i.name; opt.textContent = i.name;
+        reasonSel.appendChild(opt);
+      });
+      reasonSel.value = sr.byIndustry[0].name;
+
+      function renderReasonIndustry() {
+        var ind = sr.byIndustry.find(function (i) { return i.name === reasonSel.value; });
+        if (!ind) return;
+        makeChart("et-reason-industry-chart", {
+          type: "doughnut",
+          data: { labels: sr.labels, datasets: [{ data: ind.values, backgroundColor: COLORS.slice(0, sr.labels.length) }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { title: { display: true, text: shortName(ind.name) }, tooltip: { callbacks: { label: function (c) { return c.label + ": " + c.parsed + "%"; } } } }
+          }
+        });
+      }
+      renderReasonIndustry();
+      reasonSel.addEventListener("change", renderReasonIndustry);
     }
 
     // Table
@@ -654,6 +743,68 @@
       options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { font: { size: 10 } } } } }
     });
 
+    // Additional wage charts
+    var ad = CENSUS_DATA.additionalData;
+    if (ad) {
+      // Enterprise size wage chart
+      if (ad.wageBySizeIndustry) {
+        makeChart("wage-size-chart", {
+          type: "bar",
+          data: {
+            labels: ad.wageBySizeIndustry.map(function (i) { return shortName(i.name); }),
+            datasets: ad.wageBySizeGroups.map(function (g, gi) {
+              return { label: g, data: ad.wageBySizeIndustry.map(function (i) { return i.values[gi]; }), backgroundColor: COLORS[gi], borderRadius: 2 };
+            })
+          },
+          options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: "千円/月" } }, y: { ticks: { font: { size: 10 } } } } }
+        });
+      }
+
+      // Hourly wage chart
+      if (ad.hourlyWageByIndustry) {
+        makeChart("wage-hourly-chart", {
+          type: "bar",
+          data: {
+            labels: ad.hourlyWageByIndustry.map(function (i) { return shortName(i.name); }),
+            datasets: [{ label: "時間当たり賃金（円）", data: ad.hourlyWageByIndustry.map(function (i) { return i.value; }), backgroundColor: COLORS[1], borderRadius: 3 }]
+          },
+          options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: "円/時" } }, y: { ticks: { font: { size: 10 } } } } }
+        });
+      }
+
+      // Employment type wage gap
+      if (ad.wageByEmploymentType) {
+        var wet = ad.wageByEmploymentType;
+        makeChart("wage-emptype-chart", {
+          type: "bar",
+          data: {
+            labels: wet.industries.map(function (n) { return shortName(n); }),
+            datasets: [
+              { label: "正規雇用", data: wet.regular, backgroundColor: COLORS[0], borderRadius: 2 },
+              { label: "非正規雇用", data: wet.nonRegular, backgroundColor: COLORS[3], borderRadius: 2 }
+            ]
+          },
+          options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: "千円/月" } }, y: { ticks: { font: { size: 10 } } } } }
+        });
+      }
+
+      // Working hours chart
+      if (ad.workingHoursByIndustry) {
+        var whSorted = ad.workingHoursByIndustry.slice().sort(function (a, b) { return b.totalHours - a.totalHours; });
+        makeChart("wage-hours-chart", {
+          type: "bar",
+          data: {
+            labels: whSorted.map(function (i) { return shortName(i.name); }),
+            datasets: [
+              { label: "所定内", data: whSorted.map(function (i) { return i.totalHours - i.overtime; }), backgroundColor: COLORS[0], borderRadius: 2 },
+              { label: "残業", data: whSorted.map(function (i) { return i.overtime; }), backgroundColor: COLORS[3], borderRadius: 2 }
+            ]
+          },
+          options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } }, scales: { x: { stacked: true, title: { display: true, text: "時間/月" } }, y: { stacked: true, ticks: { font: { size: 10 } } } } }
+        });
+      }
+    }
+
     // Table
     document.getElementById("wage-table-body").innerHTML = demo.map(function (d) {
       var w = ws.monthlyWage.find(function (w) { return w.name === d.name; });
@@ -672,6 +823,82 @@
   function initAgeAnalysis() {
     var aa = CENSUS_DATA.ageAnalysis;
     var ageGroups = aa.ageGroups;
+
+    // --- Population Pyramid ---
+    if (aa.pyramidByIndustry) {
+      var pyramidLabels = aa.pyramidAgeGroups;
+
+      function renderPyramid(chartId, ind) {
+        makeChart(chartId, {
+          type: "bar",
+          data: {
+            labels: pyramidLabels,
+            datasets: [
+              { label: "男性", data: ind.male.map(function (v) { return -v; }), backgroundColor: COLORS[0], borderRadius: 2 },
+              { label: "女性", data: ind.female, backgroundColor: COLORS[5], borderRadius: 2 }
+            ]
+          },
+          options: {
+            indexAxis: "y", responsive: true, maintainAspectRatio: false,
+            plugins: { title: { display: true, text: ind.name }, tooltip: { callbacks: { label: function (c) { return c.dataset.label + ": " + Math.abs(c.parsed.x) + "万人"; } } } },
+            scales: { x: { ticks: { callback: function (v) { return Math.abs(v); } }, title: { display: true, text: "万人" } }, y: { ticks: { font: { size: 10 } } } }
+          }
+        });
+      }
+
+      var pSel = document.getElementById("pyramid-industry");
+      aa.pyramidByIndustry.forEach(function (i) {
+        var opt = document.createElement("option");
+        opt.value = i.name; opt.textContent = i.name;
+        pSel.appendChild(opt);
+      });
+      pSel.value = aa.pyramidByIndustry[0].name;
+
+      function renderMainPyramid() {
+        var ind = aa.pyramidByIndustry.find(function (i) { return i.name === pSel.value; });
+        if (ind) renderPyramid("pyramid-chart", ind);
+      }
+      renderMainPyramid();
+      pSel.addEventListener("change", renderMainPyramid);
+
+      // Comparison pyramids
+      ["pyramid-compare-a", "pyramid-compare-b"].forEach(function (selId, si) {
+        var cSel = document.getElementById(selId);
+        aa.pyramidByIndustry.forEach(function (i) {
+          var opt = document.createElement("option");
+          opt.value = i.name; opt.textContent = i.name;
+          cSel.appendChild(opt);
+        });
+        cSel.value = aa.pyramidByIndustry[si < aa.pyramidByIndustry.length ? si : 0].name;
+        var chartId = selId.replace("pyramid-compare-", "pyramid-compare-chart-");
+        function render() {
+          var ind = aa.pyramidByIndustry.find(function (i) { return i.name === cSel.value; });
+          if (ind) renderPyramid(chartId, ind);
+        }
+        render();
+        cSel.addEventListener("change", render);
+      });
+    }
+
+    // --- Regional industry chart ---
+    var ad = CENSUS_DATA.additionalData;
+    if (ad && ad.regionalIndustryShare) {
+      var ris = ad.regionalIndustryShare;
+      makeChart("regional-industry-chart", {
+        type: "bar",
+        data: {
+          labels: ris.regions,
+          datasets: ris.industries.map(function (ind, idx) {
+            return { label: ind, data: ris.data.map(function (row) { return row[idx]; }), backgroundColor: COLORS[idx], borderRadius: 1 };
+          })
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { position: "top", labels: { font: { size: 10 } } } },
+          scales: { x: { stacked: true }, y: { stacked: true, max: 100, title: { display: true, text: "%" } } }
+        }
+      });
+    }
 
     // --- Industry × Age stacked bar ---
     var indSel = document.getElementById("age-industry");
