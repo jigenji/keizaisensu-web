@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>経済センサス データビューア</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <h1 class="header-title">経済センサス データビューア</h1>
+      <p class="header-subtitle">令和3年（2021年）経済センサス‐活動調査の全データを可視化</p>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <button class="nav-btn active" data-tab="overview">概要</button>
+      <button class="nav-btn" data-tab="prefecture">都道府県別</button>
+      <button class="nav-btn" data-tab="industry">産業別</button>
+      <button class="nav-btn" data-tab="organization">経営組織別</button>
+      <button class="nav-btn" data-tab="timeseries">時系列比較</button>
+    </div>
+  </nav>
+
+  <main class="main">
+    <!-- 概要タブ -->
+    <section id="tab-overview" class="tab-content active">
+      <div class="summary-cards">
+        <div class="card summary-card">
+          <div class="summary-label">全事業所数</div>
+          <div class="summary-value" id="total-establishments">-</div>
+          <div class="summary-unit">事業所</div>
+        </div>
+        <div class="card summary-card">
+          <div class="summary-label">全従業者数</div>
+          <div class="summary-value" id="total-employees">-</div>
+          <div class="summary-unit">人</div>
+        </div>
+        <div class="card summary-card">
+          <div class="summary-label">売上（収入）金額合計</div>
+          <div class="summary-value" id="total-sales">-</div>
+          <div class="summary-unit">兆円</div>
+        </div>
+        <div class="card summary-card">
+          <div class="summary-label">付加価値額合計</div>
+          <div class="summary-value" id="total-added-value">-</div>
+          <div class="summary-unit">兆円</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">経済センサス‐活動調査とは</h2>
+        <p class="card-text">
+          経済センサス‐活動調査は、日本国内に所在する全ての事業所・企業の経済活動の実態を明らかにするために、
+          総務省・経済産業省が5年ごとに実施する基幹統計調査です。
+          事業所数、従業者数、売上（収入）金額等の産業横断的な事項を、産業分類別・地域別に把握できます。
+        </p>
+        <p class="card-text">
+          本サイトでは令和3年（2021年）6月1日に実施された最新の活動調査の結果を、
+          グラフやテーブルを用いて視覚的にわかりやすく表示しています。
+        </p>
+        <p class="card-text source-info">
+          出典：総務省・経済産業省「令和3年経済センサス‐活動調査」
+          <br>
+          <a href="https://www.e-stat.go.jp/stat-search/files?tstat=000001145590" target="_blank" rel="noopener">e-Stat 経済センサスデータ</a>
+        </p>
+      </div>
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">産業大分類別 事業所数割合</h2>
+          <div class="chart-container">
+            <canvas id="overview-industry-pie"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">地方別 事業所数</h2>
+          <div class="chart-container">
+            <canvas id="overview-region-bar"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 都道府県別タブ -->
+    <section id="tab-prefecture" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">都道府県別 事業所数・従業者数</h2>
+        <div class="controls">
+          <label>表示指標：
+            <select id="pref-metric">
+              <option value="establishments">事業所数</option>
+              <option value="employees">従業者数</option>
+              <option value="sales">売上金額（百万円）</option>
+            </select>
+          </label>
+          <label>並び順：
+            <select id="pref-sort">
+              <option value="code">都道府県コード順</option>
+              <option value="desc">降順</option>
+              <option value="asc">昇順</option>
+            </select>
+          </label>
+        </div>
+        <div class="chart-container chart-tall">
+          <canvas id="pref-chart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">都道府県別データ一覧</h2>
+        <div class="table-controls">
+          <input type="text" id="pref-search" placeholder="都道府県名で検索..." class="search-input">
+        </div>
+        <div class="table-wrapper">
+          <table class="data-table" id="pref-table">
+            <thead>
+              <tr>
+                <th data-sort="name">都道府県</th>
+                <th data-sort="establishments">事業所数</th>
+                <th data-sort="employees">従業者数</th>
+                <th data-sort="sales">売上金額（百万円）</th>
+                <th data-sort="density">事業所密度<br>（/km²）</th>
+              </tr>
+            </thead>
+            <tbody id="pref-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 産業別タブ -->
+    <section id="tab-industry" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">産業大分類別 事業所数・従業者数・売上金額</h2>
+        <div class="controls">
+          <label>表示指標：
+            <select id="ind-metric">
+              <option value="establishments">事業所数</option>
+              <option value="employees">従業者数</option>
+              <option value="sales">売上金額（百万円）</option>
+            </select>
+          </label>
+        </div>
+        <div class="chart-container chart-tall">
+          <canvas id="ind-chart"></canvas>
+        </div>
+      </div>
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">従業者数構成比</h2>
+          <div class="chart-container">
+            <canvas id="ind-emp-pie"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">売上金額構成比</h2>
+          <div class="chart-container">
+            <canvas id="ind-sales-pie"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">産業別データ一覧</h2>
+        <div class="table-wrapper">
+          <table class="data-table" id="ind-table">
+            <thead>
+              <tr>
+                <th data-sort="name">産業大分類</th>
+                <th data-sort="establishments">事業所数</th>
+                <th data-sort="employees">従業者数</th>
+                <th data-sort="sales">売上金額（百万円）</th>
+                <th data-sort="perEst">1事業所当たり<br>従業者数</th>
+                <th data-sort="perEmp">従業者1人当たり<br>売上（万円）</th>
+              </tr>
+            </thead>
+            <tbody id="ind-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 経営組織別タブ -->
+    <section id="tab-organization" class="tab-content">
+      <div class="grid-2col">
+        <div class="card">
+          <h2 class="card-title">経営組織別 事業所数</h2>
+          <div class="chart-container">
+            <canvas id="org-est-chart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">経営組織別 従業者数</h2>
+          <div class="chart-container">
+            <canvas id="org-emp-chart"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">経営組織別データ一覧</h2>
+        <div class="table-wrapper">
+          <table class="data-table" id="org-table">
+            <thead>
+              <tr>
+                <th>経営組織</th>
+                <th>事業所数</th>
+                <th>従業者数</th>
+                <th>売上金額（百万円）</th>
+              </tr>
+            </thead>
+            <tbody id="org-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 時系列比較タブ -->
+    <section id="tab-timeseries" class="tab-content">
+      <div class="card">
+        <h2 class="card-title">経済センサス 時系列比較（事業所数・従業者数）</h2>
+        <div class="chart-container">
+          <canvas id="ts-chart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">調査年次別データ</h2>
+        <div class="table-wrapper">
+          <table class="data-table" id="ts-table">
+            <thead>
+              <tr>
+                <th>調査年</th>
+                <th>全事業所数</th>
+                <th>全従業者数</th>
+                <th>売上金額合計（百万円）</th>
+                <th>事業所数増減率</th>
+                <th>従業者数増減率</th>
+              </tr>
+            </thead>
+            <tbody id="ts-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card">
+        <h2 class="card-title">産業別 時系列変化（事業所数）</h2>
+        <div class="chart-container chart-tall">
+          <canvas id="ts-industry-chart"></canvas>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>出典：総務省・経済産業省「経済センサス‐活動調査」</p>
+    <p>
+      <a href="https://www.stat.go.jp/data/e-census/2021/index.html" target="_blank" rel="noopener">統計局</a> ｜
+      <a href="https://www.e-stat.go.jp/stat-search/files?tstat=000001145590" target="_blank" rel="noopener">e-Stat</a> ｜
+      <a href="https://www.meti.go.jp/statistics/tyo/census/index.html" target="_blank" rel="noopener">経済産業省</a>
+    </p>
+  </footer>
+
+  <script src="data/census-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
