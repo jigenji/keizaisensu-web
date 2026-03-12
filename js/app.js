@@ -546,8 +546,33 @@
       options: { indexAxis: "y", responsive: true, maintainAspectRatio: false, scales: { x: { title: { display: true, text: "万円" } }, y: { ticks: { font: { size: 10 } } } } }
     });
 
+    // Gender wage trend (overallByGender)
+    if (ws.overallByGender) {
+      var g = ws.overallByGender;
+      makeChart("wage-gender-trend-chart", {
+        type: "line",
+        data: {
+          labels: g.years,
+          datasets: [
+            { label: "男性", data: g.male, borderColor: COLORS[0], backgroundColor: "transparent", tension: 0.3, pointRadius: 3 },
+            { label: "女性", data: g.female, borderColor: COLORS[5], backgroundColor: "transparent", tension: 0.3, pointRadius: 3 },
+            { label: "全体", data: g.total, borderColor: COLORS[2], backgroundColor: "transparent", tension: 0.3, pointRadius: 3, borderDash: [4, 4] }
+          ]
+        },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { title: { display: true, text: "千円/月" } } } }
+      });
+      makeChart("wage-gap-index-chart", {
+        type: "line",
+        data: {
+          labels: g.years,
+          datasets: [{ label: "女性/男性 賃金比率", data: g.genderGapIndex, borderColor: COLORS[4], backgroundColor: "rgba(124,58,237,0.1)", fill: true, tension: 0.3, pointRadius: 4 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { title: { display: true, text: "%" }, min: 60, max: 100 } } }
+      });
+    }
+
     // Gender wage chart
-    var demo = ws.demographics2023;
+    var demo = ws.demographics2024;
     var demoSorted = demo.slice().sort(function (a, b) { return b.maleWage - a.maleWage; });
     makeChart("wage-gender-chart", {
       type: "bar",
